@@ -27,36 +27,6 @@ Production-ready Machine Learning website untuk klasifikasi jamur menggunakan Ra
 - Node.js 18+ (untuk development)
 - pip (Python package manager)
 
-## 🚀 Instalasi Cepat
-
-### 1. Clone Repository
-```bash
-cd d:\deya\UASDSP
-```
-
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Persiapkan Model dari Google Colab
-
-Setelah training model di Google Colab, download 2 file penting:
-- `model.pkl` - Model Random Forest
-- `encoder.pkl` - LabelEncoder untuk semua features
-
-Masukkan kedua file ini ke folder root project (sejajar dengan `app.py`)
-
-### 4. Run Flask Server
-```bash
-python app.py
-```
-
-Server akan berjalan di: **http://localhost:5000**
-
-### 5. Buka di Browser
-Kunjungi: [http://localhost:5000](http://localhost:5000)
-
 ## 📂 Struktur Folder Project
 
 ```
@@ -81,25 +51,6 @@ UASDSP/
     └── js/
         └── script.js              # JavaScript utilities
 ```
-
-## 🔧 Cara Menggunakan Model dari Google Colab
-
-### Di Google Colab, export model dengan kode ini:
-
-```python
-import joblib
-
-# Setelah training selesai
-joblib.dump(rf_model, 'model.pkl')
-joblib.dump(encoders, 'encoder.pkl')
-```
-
-### Download kedua file, kemudian:
-
-1. Letakkan `model.pkl` di folder root
-2. Letakkan `encoder.pkl` di folder root
-3. Restart Flask server
-4. Model siap digunakan!
 
 ## 📝 Input Features (21 Attributes)
 
@@ -228,125 +179,6 @@ Response: [
 - Badges & alerts
 - Interactive charts
 
-## 📊 Integrasi Google Looker Studio
-
-### Langkah-langkah:
-
-1. **Kunjungi**: https://lookerstudio.google.com
-2. **Buat Report Baru**
-3. **Tambah Data Source**: Upload `dashboard_mushroom_final.csv`
-4. **Buat Visualisasi**:
-   - Pie chart: Edible vs Poisonous
-   - Bar chart: Odor vs Poisonous
-   - Table: Recent predictions
-   - Scorecard: Accuracy
-5. **Share & Embed**:
-   - Klik Share → Embed report
-   - Copy iframe link
-   - Paste ke halaman dashboard HTML
-
-## 🐳 Docker Deployment
-
-### Build Docker Image
-```bash
-docker build -t mushroom-ai .
-```
-
-### Run Container
-```bash
-docker run -p 5000:5000 mushroom-ai
-```
-
-### Docker Compose (Optional)
-```yaml
-version: '3'
-services:
-  web:
-    build: .
-    ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=production
-```
-
-## 🚀 Deploy Online
-
-### Option 1: Render
-1. Push project ke GitHub
-2. Connect Render ke repo
-3. Set start command: `gunicorn app:app`
-4. Set port: 5000
-5. Deploy!
-
-### Option 2: Railway
-1. Push project ke GitHub
-2. Connect Railway ke repo
-3. Set build command: `pip install -r requirements.txt`
-4. Set start command: `python app.py`
-5. Deploy!
-
-### Option 3: Heroku
-```bash
-heroku create mushroom-ai
-git push heroku main
-```
-
-## 📊 Model Performance
-
-```
-Accuracy: 95.2%
-Precision: 96.1%
-Recall: 94.5%
-F1-Score: 95.3%
-
-Features: 21 attributes
-Algorithm: Random Forest (50 trees)
-Test Size: 30%
-Random State: 42
-```
-
-## ⚠️ Disclaimer
-
-Hasil prediksi ini **HANYA untuk referensi**. Jangan pernah memakan jamur hanya berdasarkan prediksi model ini. **Selalu konsultasikan dengan ahli mikologi atau expert lainnya** sebelum mengkonsumsi jamur apapun.
-
-## 🔐 Security
-
-- Input validation di frontend dan backend
-- CORS configuration untuk API
-- Environment variables untuk sensitive data
-- Rate limiting ready (implementasi optional)
-
-## 🐛 Troubleshooting
-
-### Model tidak ditemukan
-```
-⚠ Model tidak ditemukan, model akan dimuat saat tersedia
-```
-**Solusi**: Download `model.pkl` dan `encoder.pkl` dari Colab, letakkan di folder root
-
-### Port 5000 sudah terpakai
-```bash
-# Ganti port di app.py line terakhir
-app.run(debug=True, host='0.0.0.0', port=5001)
-```
-
-### CORS Error
-```bash
-# Sudah dihandle dengan flask-cors
-# Jika masih error, pastikan Flask-CORS terinstall
-pip install flask-cors
-```
-
-### Static files tidak loading
-```bash
-# Pastikan folder structure benar:
-# static/
-#   ├── css/
-#   │   └── style.css
-#   └── js/
-#       └── script.js
-```
-
 ## 📚 Libraries Digunakan
 
 - **Flask** - Web framework
@@ -400,6 +232,5 @@ Project ini cocok untuk:
 - [ ] Database Integration (Optional)
 - [ ] File Upload ML (Optional)
 
----
 
 **Enjoy your Mushroom AI Classification System! 🍄✨**
