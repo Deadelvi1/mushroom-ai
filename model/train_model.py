@@ -383,7 +383,7 @@ def setup_mlflow_tracking(df, model, metrics):
         mlflow.set_tracking_uri(mlflow_backend_uri)
         
         print(f"   📡 MLflow Backend: Local SQLite")
-        print(f"   📦 Results will be pushed to: https://dagshub.com/{dagshub_username}/{dagshub_repo}")
+        print(f"   📦 Results will be pushed to: https://dagshub.com/deadelvina9/mushroom-ai")
         
         # Set experiment name
         experiment_name = os.getenv('MLFLOW_EXPERIMENT_NAME', 'mushroom-classification')

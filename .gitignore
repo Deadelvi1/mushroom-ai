@@ -34,14 +34,6 @@ env/
 *~
 .DS_Store
 .Thumbs.db
-
-# === ML MODEL FILES (too large for git) ===
-model/model.pkl
-model/encoder.pkl
-model/*.pkl
-model/*.joblib
-model/dashboard_mushroom_final.csv
-
 # === MLFLOW & EXPERIMENTS ===
 mlflow/
 mlruns/
