@@ -22,10 +22,11 @@ load_dotenv()
 # DagsHub & MLflow Integration
 try:
     import mlflow
+    import dagshub
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
-    print("⚠️  MLflow not installed. Skipping experiment tracking.")
+    print("⚠️  MLflow/DagsHub not installed. Skipping experiment tracking.")
 
 # ==================== DATASET LOADING ====================
 
@@ -377,13 +378,21 @@ def setup_mlflow_tracking(df, model, metrics):
         dagshub_repo = os.getenv('DAGSHUB_REPO')
         dagshub_token = os.getenv('DAGSHUB_TOKEN')
         
-        # Use local MLflow backend (more reliable)
-        # Results will be pushed to DagsHub via git
-        mlflow_backend_uri = "sqlite:///mlflow.db"
-        mlflow.set_tracking_uri(mlflow_backend_uri)
+        # Initialize DagsHub connection
+        print(f"   🔗 Connecting to DagsHub ({dagshub_username}/{dagshub_repo})...")
+        dagshub.init(
+            repo_owner=dagshub_username,
+            repo_name=dagshub_repo,
+            mlflow=True
+        )
         
-        print(f"   📡 MLflow Backend: Local SQLite")
-        print(f"   📦 Results will be pushed to: https://dagshub.com/deadelvina9/mushroom-ai")
+        # Enable MLflow autologging for sklearn
+        print(f"   ⚙️  Enabling MLflow autologging...")
+        mlflow.autolog()
+        
+        # Get tracking URI
+        tracking_uri = mlflow.get_tracking_uri()
+        print(f"   📡 MLflow Tracking URI: {tracking_uri}")
         
         # Set experiment name
         experiment_name = os.getenv('MLFLOW_EXPERIMENT_NAME', 'mushroom-classification')
@@ -431,9 +440,9 @@ def setup_mlflow_tracking(df, model, metrics):
                 artifact_path="mushroom_classifier"
             )
             
-            print("   ✅ All data logged to MLflow!")
+            print("   ✅ All data logged to MLflow + DagsHub!")
             print(f"   📊 View experiments: mlflow ui")
-            print(f"   📤 Push to DagsHub: git add . && git commit -m 'Training results' && git push origin main")
+            print(f"   🌐 View on DagsHub: https://dagshub.com/{dagshub_username}/{dagshub_repo}")
             
     except Exception as e:
         print(f"   ⚠️  MLflow tracking error (continuing): {e}")
