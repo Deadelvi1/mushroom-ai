@@ -1,0 +1,563 @@
+{% extends 'base.html' %}
+
+{% block title %}Prediction - Mushroom AI{% endblock %}
+
+{% block content %}
+<section class="predict-section py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-flask-vial text-success me-2"></i>Mushroom Prediction
+                </h1>
+                <p class="lead text-muted">Masukkan karakteristik jamur untuk mendapatkan prediksi akurat</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Prediction Form -->
+            <div class="col-lg-8">
+                <div class="card shadow-lg border-0 form-card">
+                    <div class="card-header bg-light border-bottom border-success border-2 py-3">
+                        <h5 class="mb-0 text-success fw-bold"><i class="fas fa-form me-2"></i>Fill Mushroom Characteristics</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="predictionForm">
+                            <!-- Row 1: Cap Information -->
+                            <div class="form-section mb-4">
+                                <h6 class="text-success mb-3"><i class="fas fa-hat-wizard me-2"></i>Cap Characteristics</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Cap Shape</label>
+                                        <select class="form-control form-control-lg" name="cap-shape" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="b">Bell</option>
+                                            <option value="c">Conical</option>
+                                            <option value="x">Convex</option>
+                                            <option value="f">Flat</option>
+                                            <option value="k">Knobbed</option>
+                                            <option value="s">Sunken</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Cap Surface</label>
+                                        <select class="form-control form-control-lg" name="cap-surface" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="f">Fibrous</option>
+                                            <option value="g">Grooves</option>
+                                            <option value="y">Scaly</option>
+                                            <option value="s">Smooth</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Cap Color</label>
+                                        <select class="form-control form-control-lg" name="cap-color" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="n">Brown</option>
+                                            <option value="b">Buff</option>
+                                            <option value="c">Cinnamon</option>
+                                            <option value="g">Gray</option>
+                                            <option value="r">Green</option>
+                                            <option value="p">Pink</option>
+                                            <option value="u">Purple</option>
+                                            <option value="e">Red</option>
+                                            <option value="w">White</option>
+                                            <option value="y">Yellow</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Bruises</label>
+                                        <select class="form-control form-control-lg" name="bruises" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="t">Yes</option>
+                                            <option value="f">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Odor & Gill -->
+                            <div class="form-section mb-4">
+                                <h6 class="text-success mb-3"><i class="fas fa-nose me-2"></i>Odor & Gill</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Odor</label>
+                                        <select class="form-control form-control-lg" name="odor" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="a">Almond</option>
+                                            <option value="l">Anise</option>
+                                            <option value="c">Creosote</option>
+                                            <option value="y">Fishy</option>
+                                            <option value="f">Foul</option>
+                                            <option value="m">Musty</option>
+                                            <option value="n">None</option>
+                                            <option value="p">Pungent</option>
+                                            <option value="s">Spicy</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gill Attachment</label>
+                                        <select class="form-control form-control-lg" name="gill-attachment" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="a">Attached</option>
+                                            <option value="d">Descending</option>
+                                            <option value="f">Free</option>
+                                            <option value="n">Notched</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gill Spacing</label>
+                                        <select class="form-control form-control-lg" name="gill-spacing" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="c">Close</option>
+                                            <option value="w">Crowded</option>
+                                            <option value="d">Distant</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gill Size</label>
+                                        <select class="form-control form-control-lg" name="gill-size" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="b">Broad</option>
+                                            <option value="n">Narrow</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Gill Color</label>
+                                        <select class="form-control form-control-lg" name="gill-color" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="k">Black</option>
+                                            <option value="n">Brown</option>
+                                            <option value="b">Buff</option>
+                                            <option value="h">Chocolate</option>
+                                            <option value="g">Gray</option>
+                                            <option value="r">Green</option>
+                                            <option value="o">Orange</option>
+                                            <option value="p">Pink</option>
+                                            <option value="u">Purple</option>
+                                            <option value="e">Red</option>
+                                            <option value="w">White</option>
+                                            <option value="y">Yellow</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 3: Stalk -->
+                            <div class="form-section mb-4">
+                                <h6 class="text-success mb-3"><i class="fas fa-tree me-2"></i>Stalk (Stem)</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Stalk Shape</label>
+                                        <select class="form-control form-control-lg" name="stalk-shape" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="e">Enlarging</option>
+                                            <option value="t">Tapering</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Stalk Root</label>
+                                        <select class="form-control form-control-lg" name="stalk-root" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="b">Bulbous</option>
+                                            <option value="c">Club</option>
+                                            <option value="u">Cup</option>
+                                            <option value="e">Equal</option>
+                                            <option value="z">Rhizomorphs</option>
+                                            <option value="r">Rooted</option>
+                                            <option value="?">Missing</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Stalk Surface Above Ring</label>
+                                        <select class="form-control form-control-lg" name="stalk-surface-above-ring" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="f">Fibrous</option>
+                                            <option value="y">Scaly</option>
+                                            <option value="k">Silky</option>
+                                            <option value="s">Smooth</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Stalk Surface Below Ring</label>
+                                        <select class="form-control form-control-lg" name="stalk-surface-below-ring" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="f">Fibrous</option>
+                                            <option value="y">Scaly</option>
+                                            <option value="k">Silky</option>
+                                            <option value="s">Smooth</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Stalk Color Above Ring</label>
+                                        <select class="form-control form-control-lg" name="stalk-color-above-ring" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="n">Brown</option>
+                                            <option value="b">Buff</option>
+                                            <option value="c">Cinnamon</option>
+                                            <option value="g">Gray</option>
+                                            <option value="o">Orange</option>
+                                            <option value="p">Pink</option>
+                                            <option value="e">Red</option>
+                                            <option value="w">White</option>
+                                            <option value="y">Yellow</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Stalk Color Below Ring</label>
+                                        <select class="form-control form-control-lg" name="stalk-color-below-ring" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="n">Brown</option>
+                                            <option value="b">Buff</option>
+                                            <option value="c">Cinnamon</option>
+                                            <option value="g">Gray</option>
+                                            <option value="o">Orange</option>
+                                            <option value="p">Pink</option>
+                                            <option value="e">Red</option>
+                                            <option value="w">White</option>
+                                            <option value="y">Yellow</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 4: Veil & Ring -->
+                            <div class="form-section mb-4">
+                                <h6 class="text-success mb-3"><i class="fas fa-vial me-2"></i>Veil & Ring</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Veil Color</label>
+                                        <select class="form-control form-control-lg" name="veil-color" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="n">Brown</option>
+                                            <option value="o">Orange</option>
+                                            <option value="w">White</option>
+                                            <option value="y">Yellow</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Ring Number</label>
+                                        <select class="form-control form-control-lg" name="ring-number" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="n">None</option>
+                                            <option value="o">One</option>
+                                            <option value="t">Two</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Ring Type</label>
+                                        <select class="form-control form-control-lg" name="ring-type" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="c">Cobwebby</option>
+                                            <option value="e">Evanescent</option>
+                                            <option value="f">Flaring</option>
+                                            <option value="l">Large</option>
+                                            <option value="n">None</option>
+                                            <option value="p">Pendant</option>
+                                            <option value="s">Sheathing</option>
+                                            <option value="z">Zone</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 5: Spore & Habitat -->
+                            <div class="form-section mb-4">
+                                <h6 class="text-success mb-3"><i class="fas fa-spoon me-2"></i>Spore & Habitat</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Spore Print Color</label>
+                                        <select class="form-control form-control-lg" name="spore-print-color" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="k">Black</option>
+                                            <option value="n">Brown</option>
+                                            <option value="b">Buff</option>
+                                            <option value="h">Chocolate</option>
+                                            <option value="r">Green</option>
+                                            <option value="o">Orange</option>
+                                            <option value="u">Purple</option>
+                                            <option value="w">White</option>
+                                            <option value="y">Yellow</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Population</label>
+                                        <select class="form-control form-control-lg" name="population" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="a">Abundant</option>
+                                            <option value="c">Clustered</option>
+                                            <option value="n">Numerous</option>
+                                            <option value="s">Scattered</option>
+                                            <option value="v">Several</option>
+                                            <option value="y">Solitary</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Habitat</label>
+                                        <select class="form-control form-control-lg" name="habitat" required>
+                                            <option value="">-- Select --</option>
+                                            <option value="g">Grasses</option>
+                                            <option value="l">Leaves</option>
+                                            <option value="m">Meadows</option>
+                                            <option value="p">Paths</option>
+                                            <option value="u">Urban</option>
+                                            <option value="w">Waste</option>
+                                            <option value="d">Woods</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-success btn-lg btn-submit" id="submitBtn">
+                                    <i class="fas fa-paper-plane me-2"></i>Get Prediction
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Card -->
+            <div class="col-lg-4">
+                <div id="resultContainer" style="display: none;">
+                    <div class="card shadow-lg border-0 result-card" id="resultCard">
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <div id="resultIcon" class="result-icon mb-3"></div>
+                                <h4 id="resultPrediction" class="fw-bold"></h4>
+                            </div>
+                            
+                            <div class="result-stats mb-4">
+                                <div class="result-stat">
+                                    <label>Confidence Score</label>
+                                    <div class="progress" style="height: 25px;">
+                                        <div id="confidenceBar" class="progress-bar progress-bar-striped" role="progressbar" style="width: 0%;">
+                                            <span id="confidenceText" class="fw-bold">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="result-stat mt-3">
+                                    <label>Risk Level</label>
+                                    <div id="riskBadge" class="badge bg-secondary p-2 w-100 text-center">-</div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <small>
+                                    <strong>Probabilitas:</strong><br>
+                                    Poisonous: <span id="probPoisonous">0</span>%<br>
+                                    Edible: <span id="probEdible">0</span>%
+                                </small>
+                            </div>
+
+                            <!-- Karakteristik Jamur (Mapped) -->
+                            <div class="card border-light bg-light mt-3">
+                                <div class="card-body p-3">
+                                    <small><strong>🍄 Karakteristik Jamur:</strong></small>
+                                    <div id="mappedCharacteristics" class="mt-2" style="font-size: 0.85rem; line-height: 1.6;">
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning mt-3">
+                                <small><strong>⚠️ Disclaimer:</strong> Hasil prediksi ini untuk referensi saja. Selalu konsultasikan dengan ahli sebelum memakan jamur.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Alert -->
+                    <div id="loadingAlert" class="alert alert-info mt-3" style="display: none;">
+                        <div class="spinner-border spinner-border-sm me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        Processing prediction...
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="card shadow-lg border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Form Guide</h5>
+                        <ul class="list-unstyled text-small">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Isi semua field</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Pilih opsi yang sesuai</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Klik "Get Prediction"</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Lihat hasil di samping</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form submission handler
+document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Validasi form
+    if (!validateForm('predictionForm')) {
+        showNotification('⚠️ Harap isi semua field!', 'warning');
+        return;
+    }
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    // UI updates
+    const submitBtn = document.getElementById('submitBtn');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Processing...';
+    
+    const resultContainer = document.getElementById('resultContainer');
+    const resultCard = document.getElementById('resultCard');
+    const loadingAlert = document.getElementById('loadingAlert');
+    
+    if (resultContainer) {
+        resultContainer.style.display = 'block';
+        resultCard.style.display = 'none';
+        loadingAlert.style.display = 'block';
+        loadingAlert.scrollIntoView({behavior: 'auto', block: 'nearest'});
+    }
+    
+    try {
+        const response = await fetch('/api/predict', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (loadingAlert) loadingAlert.style.display = 'none';
+        
+        if (response.ok) {
+            displayPredictionResult(result);
+            showNotification('✅ Prediksi berhasil!', 'success', 2000);
+        } else {
+            displayError(result.error || 'Terjadi kesalahan pada prediksi');
+        }
+    } catch (error) {
+        if (loadingAlert) loadingAlert.style.display = 'none';
+        displayError('Kesalahan koneksi: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
+});
+
+function displayPredictionResult(result) {
+    const isPoisonous = result.prediction === 'POISONOUS';
+    const icon = isPoisonous ? '☠️' : '✅';
+    const color = isPoisonous ? 'text-danger' : 'text-success';
+    const confidence = result.confidence;
+    
+    // Update all elements
+    document.getElementById('resultIcon').innerHTML = `<div style="font-size: 4rem;">${icon}</div>`;
+    document.getElementById('resultPrediction').textContent = result.prediction;
+    document.getElementById('resultPrediction').className = `fw-bold ${color}`;
+    
+    const confidenceBar = document.getElementById('confidenceBar');
+    if (confidenceBar) {
+        confidenceBar.className = `progress-bar progress-bar-striped ${isPoisonous ? 'bg-danger' : 'bg-success'}`;
+        confidenceBar.style.width = confidence + '%';
+    }
+    
+    document.getElementById('confidenceText').textContent = confidence + '%';
+    
+    let riskText, riskClass;
+    if (confidence > 85) {
+        riskText = '🎯 HIGH CONFIDENCE';
+        riskClass = isPoisonous ? 'bg-danger' : 'bg-success';
+    } else if (confidence > 70) {
+        riskText = '⚡ MEDIUM CONFIDENCE';
+        riskClass = 'bg-warning text-dark';
+    } else {
+        riskText = '📊 LOW CONFIDENCE';
+        riskClass = 'bg-info';
+    }
+    
+    document.getElementById('riskBadge').textContent = riskText;
+    document.getElementById('riskBadge').className = `badge ${riskClass} p-2 w-100 text-center`;
+    document.getElementById('probPoisonous').textContent = result.probability_poisonous;
+    document.getElementById('probEdible').textContent = result.probability_edible;
+    
+    // Display mapped characteristics
+    if (result.input_mapped) {
+        const charDiv = document.getElementById('mappedCharacteristics');
+        const charList = [];
+        
+        // Format karakteristik dengan label yang rapi
+        const labels = {
+            'cap-shape': 'Cap Shape',
+            'cap-surface': 'Cap Surface',
+            'cap-color': 'Cap Color',
+            'bruises': 'Bruises',
+            'odor': 'Odor',
+            'gill-attachment': 'Gill Attachment',
+            'gill-spacing': 'Gill Spacing',
+            'gill-size': 'Gill Size',
+            'gill-color': 'Gill Color',
+            'stalk-shape': 'Stalk Shape',
+            'stalk-root': 'Stalk Root',
+            'stalk-surface-above-ring': 'Stalk Surface Above Ring',
+            'stalk-surface-below-ring': 'Stalk Surface Below Ring',
+            'stalk-color-above-ring': 'Stalk Color Above Ring',
+            'stalk-color-below-ring': 'Stalk Color Below Ring',
+            'veil-color': 'Veil Color',
+            'ring-number': 'Ring Number',
+            'ring-type': 'Ring Type',
+            'spore-print-color': 'Spore Print Color',
+            'population': 'Population',
+            'habitat': 'Habitat'
+        };
+        
+        for (const [key, value] of Object.entries(result.input_mapped)) {
+            const label = labels[key] || key;
+            charList.push(`<strong>${label}:</strong> ${value}`);
+        }
+        
+        charDiv.innerHTML = charList.join('<br>');
+    }
+    
+    // Show result
+    document.getElementById('resultCard').style.display = 'block';
+    document.getElementById('resultCard').scrollIntoView({behavior: 'auto', block: 'nearest'});
+}
+
+function displayError(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <strong>Error:</strong> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const resultContainer = document.getElementById('resultContainer');
+    if (resultContainer) {
+        resultContainer.appendChild(alertDiv);
+    }
+    
+    document.getElementById('resultCard').style.display = 'none';
+}
+</script>
+
+<style>
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+}
+</style>
+{% endblock %}

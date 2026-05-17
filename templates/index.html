@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Mushroom AI Classification{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container h-100">
+        <div class="row align-items-center h-100">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="hero-content" style="animation: slideInLeft 1s ease-out;">
+                    <h1 class="display-4 fw-bold mb-3 text-white">
+                        <i class="fas fa-leaf text-success"></i>
+                        AI Mushroom Detection
+                    </h1>
+                    <p class="lead text-light mb-4">
+                        Advanced Random Forest classification untuk menentukan jamur mana yang aman dimakan dan mana yang beracun dengan akurasi tinggi.
+                    </p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="/predict" class="btn btn-success btn-lg btn-hover">
+                            <i class="fas fa-flask me-2"></i>Start Prediction
+                        </a>
+                        <a href="/dashboard" class="btn btn-outline-light btn-lg btn-hover">
+                            <i class="fas fa-chart-bar me-2"></i>View Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="hero-image" style="animation: slideInRight 1s ease-out;">
+                    <div class="floating-card">
+                        <div class="card bg-dark border-success shadow-lg">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-brain text-success" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="text-white text-center mb-3">Machine Learning Model</h5>
+                                <div class="stats-mini">
+                                    <div class="stat-item">
+                                        <div class="stat-label text-muted">Algorithm</div>
+                                        <div class="stat-value text-success">Random Forest</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-label text-muted">Features</div>
+                                        <div class="stat-value text-success">21 Attributes</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-label text-muted">Classes</div>
+                                        <div class="stat-value text-success">2 (Poisonous/Edible)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">Model Statistics</h2>
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success bg-opacity-10">
+                        <i class="fas fa-database text-success"></i>
+                    </div>
+                    <h4 class="mt-3">8,124</h4>
+                    <p class="text-muted">Dataset Records</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon bg-info bg-opacity-10">
+                        <i class="fas fa-bullseye text-info"></i>
+                    </div>
+                    <h4 class="mt-3">95.2%</h4>
+                    <p class="text-muted">Model Accuracy</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning bg-opacity-10">
+                        <i class="fas fa-check-circle text-warning"></i>
+                    </div>
+                    <h4 class="mt-3">21</h4>
+                    <p class="text-muted">Input Features</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon bg-danger bg-opacity-10">
+                        <i class="fas fa-flask-vial text-danger"></i>
+                    </div>
+                    <h4 class="mt-3">Real-time</h4>
+                    <p class="text-muted">Prediction</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">Features</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h5>Advanced ML Model</h5>
+                    <p>Random Forest dengan 50 trees untuk akurasi prediksi maksimal</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h5>Interactive Dashboard</h5>
+                    <p>Real-time analytics dan monitoring terintegrasi Looker Studio</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h5>Mobile Friendly</h5>
+                    <p>Responsive design yang sempurna di semua device</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-zap"></i>
+                    </div>
+                    <h5>Fast Prediction</h5>
+                    <p>Hasil prediksi instant dengan confidence score</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h5>Prediction History</h5>
+                    <p>Simpan dan lihat riwayat semua prediksi Anda</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h5>API Integration</h5>
+                    <p>REST API yang siap untuk integrasi dengan aplikasi lain</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">How It Works</h2>
+        <div class="row">
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h5>Fill Form</h5>
+                    <p>Masukkan karakteristik jamur yang ingin diklasifikasi</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h5>Process Data</h5>
+                    <p>Sistem mengolah data menggunakan model ML</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h5>Analyze</h5>
+                    <p>Model memberikan prediksi dengan confidence score</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h5>View Result</h5>
+                    <p>Lihat hasil lengkap dan analisis detail prediksi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container text-center">
+        <h2 class="mb-4 text-white">Ready to Predict?</h2>
+        <p class="lead text-light mb-4">Mulai klasifikasi jamur Anda sekarang dan dapatkan hasil dengan akurasi tinggi</p>
+        <a href="/predict" class="btn btn-success btn-lg btn-hover">
+            <i class="fas fa-rocket me-2"></i>Start Now
+        </a>
+    </div>
+</section>
+
+<style>
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.floating-card {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+</style>
+{% endblock %}

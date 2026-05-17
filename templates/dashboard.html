@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Mushroom AI{% endblock %}
+
+{% block content %}
+<section class="dashboard-section py-5">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-chart-bar text-success me-2"></i>Analytics Dashboard
+                </h1>
+                <p class="lead text-muted">Real-time monitoring dan analytics dari model prediksi</p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-white shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-2">Total Predictions</p>
+                                <h3 class="fw-bold" id="totalStats">0</h3>
+                            </div>
+                            <div class="stat-icon bg-primary bg-opacity-10">
+                                <i class="fas fa-chart-line text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-white shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-2">Poisonous</p>
+                                <h3 class="fw-bold text-danger" id="poisonousStats">0</h3>
+                            </div>
+                            <div class="stat-icon bg-danger bg-opacity-10">
+                                <i class="fas fa-flask-vial text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-white shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-2">Edible</p>
+                                <h3 class="fw-bold text-success" id="edibleStats">0</h3>
+                            </div>
+                            <div class="stat-icon bg-success bg-opacity-10">
+                                <i class="fas fa-leaf text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-white shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-2">Avg Confidence</p>
+                                <h3 class="fw-bold text-info" id="confidenceStats">0%</h3>
+                            </div>
+                            <div class="stat-icon bg-info bg-opacity-10">
+                                <i class="fas fa-bullseye text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <!-- Pie Chart -->
+            <div class="col-md-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-light py-3 border-bottom">
+                        <h5 class="mb-0">Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confidence Chart -->
+            <div class="col-md-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-light py-3 border-bottom">
+                        <h5 class="mb-0">Confidence Score Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="confidenceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Looker Studio Embed -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-light py-3 border-bottom">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Looker Studio Dashboard
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div style="background: #f8f9fa; padding: 20px; text-align: center;">
+                            <p class="text-muted mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Ganti link Looker Studio di bawah ini setelah membuat dashboard di Google Looker Studio
+                            </p>
+                            <iframe
+                                width="100%"
+                                height="700"
+                                src="https://looker.com/embed"
+                                frameborder="0"
+                                style="border-radius: 8px; display: none;"
+                                allowfullscreen>
+                            </iframe>
+                            <div class="alert alert-info">
+                                <strong>Instruksi:</strong> Buat dashboard di Google Looker Studio menggunakan file CSV (dashboard_mushroom_final.csv), 
+                                lalu embed link-nya ke halaman ini.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Predictions -->
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-light py-3 border-bottom">
+                        <h5 class="mb-0">Recent Predictions</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Prediction</th>
+                                        <th>Confidence</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentPredictionsBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">No predictions yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Initialize charts
+let distributionChart, confidenceChart;
+
+async function loadDashboardData() {
+    try {
+        const response = await fetch('/api/stats');
+        const stats = await response.json();
+        
+        // Animate stat cards
+        animateStatCard('totalStats', stats.total);
+        animateStatCard('poisonousStats', stats.poisonous);
+        animateStatCard('edibleStats', stats.edible);
+        
+        // Update confidence with animation
+        const confidenceElement = document.getElementById('confidenceStats');
+        const oldValue = parseInt(confidenceElement.textContent);
+        animateValue(confidenceElement, oldValue || 0, stats.avg_confidence, 800);
+        confidenceElement.textContent = stats.avg_confidence + '%';
+        
+        // Update distribution chart
+        updateDistributionChart(stats);
+        
+        // Update confidence distribution chart
+        updateConfidenceChart(stats);
+        
+        // Load recent predictions
+        loadRecentPredictions();
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+function animateValue(element, start, end, duration) {
+    if (start === end) return;
+    
+    const range = end - start;
+    const increment = end > start ? 1 : -1;
+    const stepTime = Math.abs(Math.floor(duration / range));
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current > end) || (increment < 0 && current < end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = current + '%';
+    }, stepTime);
+}
+
+function animateStatCard(elementId, value) {
+    const element = document.getElementById(elementId);
+    const currentValue = parseInt(element.textContent) || 0;
+    
+    if (currentValue === value) return;
+    
+    const card = element.closest('.stat-card');
+    card.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+    card.style.transform = 'scale(1.02)';
+    
+    setTimeout(() => {
+        card.style.transform = 'scale(1)';
+    }, 100);
+    
+    element.textContent = value;
+}
+
+function updateDistributionChart(stats) {
+    const ctx = document.getElementById('distributionChart').getContext('2d');
+    const total = stats.edible + stats.poisonous;
+    const ediblePercent = total > 0 ? ((stats.edible / total) * 100).toFixed(1) : 0;
+    const poisonousPercent = total > 0 ? ((stats.poisonous / total) * 100).toFixed(1) : 0;
+    
+    if (distributionChart) {
+        distributionChart.data.datasets[0].data = [stats.edible, stats.poisonous];
+        distributionChart.update();
+    } else {
+        distributionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [`Edible (${ediblePercent}%)`, `Poisonous (${poisonousPercent}%)`],
+                datasets: [{
+                    data: [stats.edible, stats.poisonous],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderColor: ['#fff', '#fff'],
+                    borderWidth: 3,
+                    hoverBorderWidth: 5,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 14,
+                                weight: '600'
+                            },
+                            color: '#333'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                return label + ': ' + value + ' items';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+function updateConfidenceChart(stats) {
+    const ctx = document.getElementById('confidenceChart');
+    
+    // Create confidence distribution data
+    const confidenceData = {
+        'High (85+)': 0,
+        'Medium (70-85)': 0,
+        'Low (<70)': 0
+    };
+    
+    if (confidenceChart) {
+        confidenceChart.data.datasets[0].data = Object.values(confidenceData);
+        confidenceChart.update();
+    } else {
+        confidenceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(confidenceData),
+                datasets: [{
+                    label: 'Predictions',
+                    data: Object.values(confidenceData),
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                    borderColor: ['#28a745', '#ffc107', '#dc3545'],
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    hoverBackgroundColor: ['#20c997', '#ffb700', '#c82333']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.x + ' predictions';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+async function loadRecentPredictions() {
+    try {
+        const response = await fetch('/api/history');
+        const history = await response.json();
+        
+        const tbody = document.getElementById('recentPredictionsBody');
+        
+        if (history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><em>No predictions yet. Go to prediction page to start!</em></td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = history.map(item => {
+            const isPoisonous = item.prediction === 'POISONOUS';
+            const badgeClass = isPoisonous ? 'bg-danger' : 'bg-success';
+            const icon = isPoisonous ? '☠️' : '✅';
+            const riskLevel = item.confidence > 85 ? 'HIGH' : item.confidence > 70 ? 'MEDIUM' : 'LOW';
+            const riskColor = item.confidence > 85 ? 'success' : item.confidence > 70 ? 'warning' : 'info';
+            
+            return `
+                <tr>
+                    <td>
+                        <small class="text-muted">
+                            <i class="far fa-clock me-1"></i>${item.timestamp}
+                        </small>
+                    </td>
+                    <td>
+                        <strong>${item.prediction}</strong>
+                        <span class="badge ${badgeClass} ms-2">${icon}</span>
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 24px; border-radius: 4px;">
+                            <div class="progress-bar ${isPoisonous ? 'bg-danger' : 'bg-success'} progress-bar-striped" 
+                                 style="width: ${item.confidence}%;">
+                                <small class="fw-bold">${item.confidence.toFixed(1)}%</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-${riskColor} text-${riskColor === 'warning' ? 'dark' : 'white'}">
+                            ${riskLevel}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }).reverse().slice(0, 10).join('');
+        
+    } catch (error) {
+        console.error('Error loading recent predictions:', error);
+    }
+}
+
+// Refresh dashboard on page load and periodically
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+});
+
+// Update dashboard every 10 seconds
+setInterval(loadDashboardData, 10000);
+</script>
+{% endblock %}

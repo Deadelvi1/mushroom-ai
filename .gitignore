@@ -1,0 +1,58 @@
+# === ENVIRONMENT & CREDENTIALS ===
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# === PYTHON ===
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.log
+
+# === VIRTUAL ENVIRONMENTS ===
+.venv/
+venv/
+ENV/
+env/
+
+# === IDE & EDITOR ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.Thumbs.db
+
+# === ML MODEL FILES (too large for git) ===
+model/model.pkl
+model/encoder.pkl
+model/*.pkl
+model/*.joblib
+model/dashboard_mushroom_final.csv
+
+# === MLFLOW & EXPERIMENTS ===
+mlflow/
+mlruns/
+*.db
+.mlflow
+
+# === DOCKER ===
+.dockerignore
+docker-compose.override.yml
+
+# === OTHERS ===
+*.tmp
+node_modules/
+package-lock.json
