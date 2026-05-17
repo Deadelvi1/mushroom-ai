@@ -10,11 +10,13 @@
 2. [Struktur Project](#-struktur-project)
 3. [Data Science Lifecycle](#-data-science-lifecycle-lengkap)
 4. [Training Model](#-training-model-random-forest)
-5. [Setup DagsHub](#-setup-dagshub--mlflow)
-6. [Docker Containerization](#-docker-containerization)
-7. [GitHub Repository](#-github-repository)
-8. [Deploy ke Railway](#-deploy-ke-railway)
-9. [Troubleshooting](#-troubleshooting)
+5. [Encoding Consistency - Why Predictions Differ](#-encoding-consistency---why-predictions-differ-colab-vs-local)
+6. [Setup DagsHub](#-setup-dagshub--mlflow)
+7. [Docker Containerization](#-docker-containerization---comprehensive-setup)
+8. [Setup Looker Studio Analytics](#-setup-looker-studio-analytics)
+9. [GitHub Repository](#-github-repository)
+10. [Deploy ke Railway](#-deploy-ke-railway---complete-guide)
+11. [Troubleshooting](#-troubleshooting)
 
 ---
 
@@ -1209,7 +1211,140 @@ Visit: http://localhost:8000/dashboard
 
 ---
 
-## 🔗 GITHUB REPOSITORY
+## � ENCODING CONSISTENCY - Why Predictions Differ (Colab vs Local)
+
+### The Problem: Different Encoding Methods
+
+**Google Colab Original Code:**
+```python
+for col in df_ml.columns:
+    le = LabelEncoder()
+    df_ml[col] = le.fit_transform(df_ml[col])  # Uses data order
+    encoders[col] = le
+```
+
+**Local Code (BEFORE FIX):**
+```python
+codes = sorted(col_mapping.keys())  # ❌ SORTED!
+code_to_index = {code: idx for idx, code in enumerate(codes)}
+```
+
+**Result:** Different encoding → Different predictions!
+
+### The Solution: Use Same LabelEncoder
+
+**Local Code (AFTER FIX):**
+```python
+for col in df_ml.columns:
+    le = LabelEncoder()
+    df_ml[col] = le.fit_transform(df_ml[col].astype(str))  # ✅ SAMA!
+    encoders[col] = le
+```
+
+### How to Verify Consistency
+
+```bash
+# After training with fixed code
+python model/train_model.py
+
+# Expected message:
+# ✅ Using LabelEncoder (same as Google Colab) for consistency
+```
+
+### What This Means
+
+- ✅ Predictions now match Google Colab exactly
+- ✅ No more confusion about different results
+- ✅ Consistent model performance across environments
+- ✅ Better for production deployment
+
+---
+
+## 📱 SETUP LOOKER STUDIO ANALYTICS
+
+### 1. Prepare CSV File
+
+After training, you'll have: `model/dashboard_mushroom_final.csv`
+
+This file contains:
+- All mushroom characteristics (22 columns)
+- Model predictions (Edible/Poisonous)
+- Confidence scores
+- Accuracy (Correct/Wrong)
+
+### 2. Upload to Google Drive
+
+```
+1. Open: https://drive.google.com
+2. Upload: model/dashboard_mushroom_final.csv
+3. Set sharing: "Anyone with link can view"
+```
+
+### 3. Create Looker Studio Report
+
+```
+1. Visit: https://looker.studio
+2. Create → Blank report
+3. Add data source → Google Drive → Select CSV
+4. Add visualizations:
+   - Pie chart: Edible vs Poisonous
+   - Bar chart: Accuracy breakdown
+   - Scorecard: Total predictions
+   - Table: Raw data
+```
+
+### 4. Sample Visualizations
+
+**Pie Chart:**
+- Dimension: Prediction
+- Metric: COUNT(Prediction)
+- Title: "Prediction Distribution"
+
+**Bar Chart:**
+- Dimension: Prediction
+- Metric: COUNT(Accuracy)
+- Filter: Accuracy = Correct
+- Title: "Correct Predictions"
+
+**Scorecard:**
+- Metric: COUNT(all records)
+- Title: "Total Mushrooms Predicted"
+
+### 5. Share Dashboard
+
+```
+1. Click "Share" (top right)
+2. Set permission: "Viewer"
+3. Copy link & share
+```
+
+---
+
+## ✅ NAVIGATION & UI UPDATES
+
+### Navigation Menu Order
+```
+Home → Dashboard → Predict ✅
+```
+
+### Prediction Form
+- **Pre-filled with default values** for easy demo
+- Default mushroom: White cap, Almond odor (typically edible)
+- Just click "Get Prediction" to see instant result
+
+### Default Values
+```
+cap-shape: x (Convex)
+cap-surface: s (Smooth)
+cap-color: w (White)
+bruises: t (Yes)
+odor: a (Almond)
+... and all other fields
+```
+
+---
+
+## �🔗 GITHUB REPOSITORY
 
 ### 1. Create GitHub Repository
 

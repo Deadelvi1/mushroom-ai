@@ -9,12 +9,39 @@ import json
 import logging
 warnings.filterwarnings('ignore')
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+# Setup MLflow tracking
+try:
+    import mlflow
+    MLFLOW_AVAILABLE = True
+    
+    # Configure MLflow with DagsHub
+    dagshub_username = os.getenv('DAGSHUB_USERNAME')
+    dagshub_repo = os.getenv('DAGSHUB_REPO')
+    dagshub_token = os.getenv('DAGSHUB_TOKEN')
+    mlflow_tracking_uri = os.getenv('MLFLOW_TRACKING_URI')
+    
+    if mlflow_tracking_uri and dagshub_token:
+        mlflow.set_tracking_uri(mlflow_tracking_uri)
+        os.environ['MLFLOW_TRACKING_USERNAME'] = dagshub_username or ''
+        os.environ['MLFLOW_TRACKING_PASSWORD'] = dagshub_token
+        logger_msg = f"✅ MLflow configured for DagsHub: {mlflow_tracking_uri}"
+    else:
+        logger_msg = "⚠️  DagsHub credentials not found. Using local MLflow."
+except ImportError:
+    MLFLOW_AVAILABLE = False
+    logger_msg = "⚠️  MLflow not installed. Experiment tracking disabled."
+
 # Setup logging for monitoring
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+logger.info(logger_msg)
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024

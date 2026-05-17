@@ -15,7 +15,11 @@ from sklearn.metrics import (
     f1_score
 )
 
-# DagsHub & MLflow Integration (optional)
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+# DagsHub & MLflow Integration
 try:
     import mlflow
     MLFLOW_AVAILABLE = True
@@ -136,7 +140,7 @@ def get_feature_mapping():
 # ==================== PREPROCESSING ====================
 
 def preprocess_data(df):
-    """Preprocess dataset"""
+    """Preprocess dataset - SAME AS GOOGLE COLAB"""
     
     print("\n🔧 Preprocessing data...")
     
@@ -149,42 +153,18 @@ def preprocess_data(df):
     if 'veil-type' in df_ml.columns:
         df_ml.drop('veil-type', axis=1, inplace=True)
     
-    # Get feature mapping
-    feature_mapping = get_feature_mapping()
-    
-    # Create encoders - map each code to a numeric index
+    # ⚠️  IMPORTANT: Use SAME encoding as Google Colab for consistency
+    # Use LabelEncoder (NOT custom sorted mapping) to match Colab results
     encoders = {}
     
     for col in df_ml.columns:
-        if col in feature_mapping:
-            # Get the mapping for this column
-            col_mapping = feature_mapping[col]
-            # Create a dict that maps codes to numeric indices
-            codes = sorted(col_mapping.keys())
-            code_to_index = {code: idx for idx, code in enumerate(codes)}
-            
-            # Transform column using the code_to_index mapping
-            # Handle unmapped values by using fillna or keeping them as is
-            mapped_values = df_ml[col].astype(str).map(code_to_index)
-            
-            # Fill any NaN values (unmapped codes) with mode or first index
-            if mapped_values.isna().any():
-                print(f"⚠️  Column '{col}' has unmapped values, filling with mode...")
-                fill_value = int(mapped_values.mode()[0]) if not mapped_values.mode().empty else 0
-                mapped_values.fillna(fill_value, inplace=True)
-            
-            df_ml[col] = mapped_values
-            
-            # Save the encoder for later use
-            encoders[col] = code_to_index
-        else:
-            # Fallback to LabelEncoder for unknown columns
-            le = LabelEncoder()
-            df_ml[col] = le.fit_transform(df_ml[col].astype(str))
-            encoders[col] = le
+        le = LabelEncoder()
+        df_ml[col] = le.fit_transform(df_ml[col].astype(str))
+        encoders[col] = le
     
     print(f"✅ Preprocessing complete!")
     print(f"   Columns: {list(df_ml.columns)}")
+    print(f"   ℹ️  Using LabelEncoder (same as Google Colab) for consistency")
     
     return df_ml, encoders
 
@@ -380,20 +360,46 @@ def export_dashboard_csv(df_original, model, X, encoders, output_dir='model'):
     
     return csv_path
 
-# ==================== MLFLOW INTEGRATION ====================
+# ==================== MLFLOW INTEGRATION WITH DAGSHUB ====================
 
 def setup_mlflow_tracking(df, model, metrics):
-    """Setup MLflow for experiment tracking"""
+    """Setup MLflow with DagsHub remote tracking"""
     
     if not MLFLOW_AVAILABLE:
+        print("⚠️  MLflow not available. Skipping tracking.")
         return
     
-    print("\n📈 Setting up MLflow tracking...")
+    print("\n📈 Setting up MLflow + DagsHub tracking...")
     
     try:
+        # Load DagsHub credentials from environment
+        dagshub_username = os.getenv('DAGSHUB_USERNAME')
+        dagshub_repo = os.getenv('DAGSHUB_REPO')
+        dagshub_token = os.getenv('DAGSHUB_TOKEN')
+        
+        # Use local MLflow backend (more reliable)
+        # Results will be pushed to DagsHub via git
+        mlflow_backend_uri = "sqlite:///mlflow.db"
+        mlflow.set_tracking_uri(mlflow_backend_uri)
+        
+        print(f"   📡 MLflow Backend: Local SQLite")
+        print(f"   📦 Results will be pushed to: https://dagshub.com/{dagshub_username}/{dagshub_repo}")
+        
+        # Set experiment name
+        experiment_name = os.getenv('MLFLOW_EXPERIMENT_NAME', 'mushroom-classification')
+        try:
+            mlflow.set_experiment(experiment_name)
+        except:
+            mlflow.create_experiment(experiment_name)
+            mlflow.set_experiment(experiment_name)
+        print(f"   📊 Experiment: {experiment_name}")
+        
         # Start MLflow run
-        with mlflow.start_run():
+        with mlflow.start_run(run_name="mushroom-random-forest"):
+            
+            print("   📝 Logging parameters...")
             # Log parameters
+            mlflow.log_param("model_type", "RandomForestClassifier")
             mlflow.log_param("n_estimators", 50)
             mlflow.log_param("max_depth", 5)
             mlflow.log_param("min_samples_split", 5)
@@ -402,15 +408,35 @@ def setup_mlflow_tracking(df, model, metrics):
             mlflow.log_param("test_size", 0.3)
             mlflow.log_param("random_state", 42)
             
+            print("   📊 Logging metrics...")
             # Log metrics
             mlflow.log_metric("accuracy", metrics['accuracy'])
             mlflow.log_metric("train_accuracy", metrics['train_accuracy'])
             mlflow.log_metric("test_accuracy", metrics['test_accuracy'])
+            mlflow.log_metric("precision", metrics['precision'])
+            mlflow.log_metric("recall", metrics['recall'])
+            mlflow.log_metric("f1_score", metrics['f1_score'])
             
-            print("   ✅ MLflow tracking complete!")
+            # Log confusion matrix details
+            cm = metrics['confusion_matrix']
+            mlflow.log_metric("true_negatives", cm['true_negatives'])
+            mlflow.log_metric("false_positives", cm['false_positives'])
+            mlflow.log_metric("false_negatives", cm['false_negatives'])
+            mlflow.log_metric("true_positives", cm['true_positives'])
+            
+            print("   🤖 Logging model...")
+            # Log model
+            mlflow.sklearn.log_model(
+                model,
+                artifact_path="mushroom_classifier"
+            )
+            
+            print("   ✅ All data logged to MLflow!")
+            print(f"   📊 View experiments: mlflow ui")
+            print(f"   📤 Push to DagsHub: git add . && git commit -m 'Training results' && git push origin main")
             
     except Exception as e:
-        print(f"   ⚠️  MLflow error: {e}")
+        print(f"   ⚠️  MLflow tracking error (continuing): {e}")
 
 # ==================== MAIN TRAINING PIPELINE ====================
 
