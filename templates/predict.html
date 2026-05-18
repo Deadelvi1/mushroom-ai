@@ -357,7 +357,6 @@
                                 <div class="card-body p-3">
                                     <small><strong>🍄 Karakteristik Jamur:</strong></small>
                                     <div id="mappedCharacteristics" class="mt-2" style="font-size: 0.85rem; line-height: 1.6;">
-                                        <!-- Will be populated by JavaScript -->
                                     </div>
                                 </div>
                             </div>
@@ -398,11 +397,9 @@
 
 {% block extra_js %}
 <script>
-// Form submission handler
 document.getElementById('predictionForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Validasi form
     if (!validateForm('predictionForm')) {
         showNotification('⚠️ Harap isi semua field!', 'warning');
         return;
@@ -412,7 +409,6 @@ document.getElementById('predictionForm').addEventListener('submit', async (e) =
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    // UI updates
     const submitBtn = document.getElementById('submitBtn');
     const originalBtnText = submitBtn.innerHTML;
     submitBtn.disabled = true;
@@ -461,7 +457,6 @@ function displayPredictionResult(result) {
     const color = isPoisonous ? 'text-danger' : 'text-success';
     const confidence = result.confidence;
     
-    // Update all elements
     document.getElementById('resultIcon').innerHTML = `<div style="font-size: 4rem;">${icon}</div>`;
     document.getElementById('resultPrediction').textContent = result.prediction;
     document.getElementById('resultPrediction').className = `fw-bold ${color}`;
@@ -491,12 +486,10 @@ function displayPredictionResult(result) {
     document.getElementById('probPoisonous').textContent = result.probability_poisonous;
     document.getElementById('probEdible').textContent = result.probability_edible;
     
-    // Display mapped characteristics
     if (result.input_mapped) {
         const charDiv = document.getElementById('mappedCharacteristics');
         const charList = [];
         
-        // Format karakteristik dengan label yang rapi
         const labels = {
             'cap-shape': 'Cap Shape',
             'cap-surface': 'Cap Surface',
@@ -529,7 +522,6 @@ function displayPredictionResult(result) {
         charDiv.innerHTML = charList.join('<br>');
     }
     
-    // Show result
     document.getElementById('resultCard').style.display = 'block';
     document.getElementById('resultCard').scrollIntoView({behavior: 'auto', block: 'nearest'});
 }

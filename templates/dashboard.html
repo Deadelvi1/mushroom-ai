@@ -119,22 +119,22 @@
                         </h5>
                     </div>
                     <div class="card-body p-0">
-                        <div style="background: #f8f9fa; padding: 20px; text-align: center;">
+                        <div style="background: #f8f9fa; padding: 20px;">
                             <p class="text-muted mb-3">
                                 <i class="fas fa-info-circle me-2"></i>
-                                Ganti link Looker Studio di bawah ini setelah membuat dashboard di Google Looker Studio
+                                Dashboard from looker Studio
                             </p>
                             <iframe
                                 width="100%"
                                 height="700"
-                                src="https://looker.com/embed"
+                                src="https://datastudio.google.com/embed/reporting/f644ea3a-869c-46cb-83ca-534063215c5e/page/2V3qF"
                                 frameborder="0"
-                                style="border-radius: 8px; display: none;"
-                                allowfullscreen>
+                                style="border-radius: 8px; display: block;"
+                                allowfullscreen
+                                allow="fullscreen">
                             </iframe>
-                            <div class="alert alert-info">
-                                <strong>Instruksi:</strong> Buat dashboard di Google Looker Studio menggunakan file CSV (dashboard_mushroom_final.csv), 
-                                lalu embed link-nya ke halaman ini.
+                            <div class="alert alert-info mt-3">
+                                <strong>Note : </strong> Integrasi Dashboard looker dari data mushroom ai yg sudah di olah
                             </div>
                         </div>
                     </div>
@@ -180,7 +180,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-// Initialize charts
 let distributionChart, confidenceChart;
 
 async function loadDashboardData() {
@@ -188,24 +187,19 @@ async function loadDashboardData() {
         const response = await fetch('/api/stats');
         const stats = await response.json();
         
-        // Animate stat cards
         animateStatCard('totalStats', stats.total);
         animateStatCard('poisonousStats', stats.poisonous);
         animateStatCard('edibleStats', stats.edible);
         
-        // Update confidence with animation
         const confidenceElement = document.getElementById('confidenceStats');
         const oldValue = parseInt(confidenceElement.textContent);
         animateValue(confidenceElement, oldValue || 0, stats.avg_confidence, 800);
         confidenceElement.textContent = stats.avg_confidence + '%';
         
-        // Update distribution chart
         updateDistributionChart(stats);
         
-        // Update confidence distribution chart
         updateConfidenceChart(stats);
         
-        // Load recent predictions
         loadRecentPredictions();
         
     } catch (error) {
@@ -304,7 +298,6 @@ function updateDistributionChart(stats) {
 function updateConfidenceChart(stats) {
     const ctx = document.getElementById('confidenceChart');
     
-    // Create confidence distribution data
     const confidenceData = {
         'High (85+)': 0,
         'Medium (70-85)': 0,
@@ -411,12 +404,10 @@ async function loadRecentPredictions() {
     }
 }
 
-// Refresh dashboard on page load and periodically
 document.addEventListener('DOMContentLoaded', function() {
     loadDashboardData();
 });
 
-// Update dashboard every 10 seconds
 setInterval(loadDashboardData, 10000);
 </script>
 {% endblock %}

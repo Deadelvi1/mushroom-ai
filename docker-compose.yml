@@ -26,7 +26,7 @@ services:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow-server
     ports:
-      - "5001:5000"
+      - "8000:8000"
     environment:
       - MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db
       - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts

@@ -154,8 +154,6 @@ def preprocess_data(df):
     if 'veil-type' in df_ml.columns:
         df_ml.drop('veil-type', axis=1, inplace=True)
     
-    # ⚠️  IMPORTANT: Use SAME encoding as Google Colab for consistency
-    # Use LabelEncoder (NOT custom sorted mapping) to match Colab results
     encoders = {}
     
     for col in df_ml.columns:
@@ -303,7 +301,6 @@ def export_metrics(metrics, output_dir='model'):
     
     metrics_path = os.path.join(output_dir, 'metrics.json')
     
-    # Prepare metrics for JSON serialization
     metrics_json = {
         'accuracy': metrics['accuracy'],
         'train_accuracy': metrics['train_accuracy'],
@@ -373,12 +370,10 @@ def setup_mlflow_tracking(df, model, metrics):
     print("\n📈 Setting up MLflow + DagsHub tracking...")
     
     try:
-        # Load DagsHub credentials from environment
         dagshub_username = os.getenv('DAGSHUB_USERNAME')
         dagshub_repo = os.getenv('DAGSHUB_REPO')
         dagshub_token = os.getenv('DAGSHUB_TOKEN')
         
-        # Initialize DagsHub connection
         print(f"   🔗 Connecting to DagsHub ({dagshub_username}/{dagshub_repo})...")
         dagshub.init(
             repo_owner=dagshub_username,
@@ -386,15 +381,12 @@ def setup_mlflow_tracking(df, model, metrics):
             mlflow=True
         )
         
-        # Enable MLflow autologging for sklearn
         print(f"   ⚙️  Enabling MLflow autologging...")
         mlflow.autolog()
         
-        # Get tracking URI
         tracking_uri = mlflow.get_tracking_uri()
         print(f"   📡 MLflow Tracking URI: {tracking_uri}")
         
-        # Set experiment name
         experiment_name = os.getenv('MLFLOW_EXPERIMENT_NAME', 'mushroom-classification')
         try:
             mlflow.set_experiment(experiment_name)
@@ -403,11 +395,9 @@ def setup_mlflow_tracking(df, model, metrics):
             mlflow.set_experiment(experiment_name)
         print(f"   📊 Experiment: {experiment_name}")
         
-        # Start MLflow run
         with mlflow.start_run(run_name="mushroom-random-forest"):
             
             print("   📝 Logging parameters...")
-            # Log parameters
             mlflow.log_param("model_type", "RandomForestClassifier")
             mlflow.log_param("n_estimators", 50)
             mlflow.log_param("max_depth", 5)
@@ -418,7 +408,6 @@ def setup_mlflow_tracking(df, model, metrics):
             mlflow.log_param("random_state", 42)
             
             print("   📊 Logging metrics...")
-            # Log metrics
             mlflow.log_metric("accuracy", metrics['accuracy'])
             mlflow.log_metric("train_accuracy", metrics['train_accuracy'])
             mlflow.log_metric("test_accuracy", metrics['test_accuracy'])
@@ -426,7 +415,6 @@ def setup_mlflow_tracking(df, model, metrics):
             mlflow.log_metric("recall", metrics['recall'])
             mlflow.log_metric("f1_score", metrics['f1_score'])
             
-            # Log confusion matrix details
             cm = metrics['confusion_matrix']
             mlflow.log_metric("true_negatives", cm['true_negatives'])
             mlflow.log_metric("false_positives", cm['false_positives'])
@@ -434,7 +422,7 @@ def setup_mlflow_tracking(df, model, metrics):
             mlflow.log_metric("true_positives", cm['true_positives'])
             
             print("   🤖 Logging model...")
-            # Log model
+
             mlflow.sklearn.log_model(
                 model,
                 artifact_path="mushroom_classifier"
@@ -456,7 +444,6 @@ def main():
     print("🍄 MUSHROOM CLASSIFICATION - RANDOM FOREST TRAINING")
     print("=" * 60)
     
-    # 1. Load dataset
     df = load_dataset()
     if df is None:
         print("❌ Failed to load dataset. Exiting.")
@@ -515,11 +502,6 @@ def main():
     print(f"   • Precision: {metrics['precision']:.2%}")
     print(f"   • Recall: {metrics['recall']:.2%}")
     print(f"   • F1-Score: {metrics['f1_score']:.4f}")
-    print("\n🚀 Next steps:")
-    print("   1. Copy model/ folder ke project root")
-    print("   2. Run Flask server: python app.py")
-    print("   3. Visit: http://localhost:8000")
-    print("   4. Check metrics at: http://localhost:8000/api/model-metrics")
     print("\n" + "=" * 60)
 
 if __name__ == "__main__":

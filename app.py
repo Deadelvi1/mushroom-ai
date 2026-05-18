@@ -132,8 +132,6 @@ def build_reverse_encoders(feature_mapping, encoders):
     
     for col in feature_mapping:
         if col in encoders and isinstance(encoders[col], dict):
-            # encoders[col] is code -> index mapping
-            # Reverse it to index -> human readable
             code_to_readable = feature_mapping[col]
             index_to_code = {v: k for k, v in encoders[col].items()}
             
@@ -151,19 +149,16 @@ encoders = None
 required_features_list = None
 features_order = None
 reverse_encoders = None
-model_metrics = None  # Store model evaluation metrics
-model_info = {}  # Store model metadata
+model_metrics = None  
+model_info = {}  
 
 try:
     model = joblib.load('model/model.pkl')
     encoders = joblib.load('model/encoder.pkl')
-    # Pre-cache required features untuk speed
     required_features_list = [f for f in encoders.keys() if f != 'poisonous']
     features_order = required_features_list.copy()
-    # Build reverse encoders untuk hasil prediksi
     reverse_encoders = build_reverse_encoders(FEATURE_MAPPING, encoders)
     
-    # Try to load model evaluation metrics
     try:
         if os.path.exists('model/metrics.json'):
             with open('model/metrics.json', 'r') as f:
@@ -176,7 +171,6 @@ try:
         logger.warning(f"⚠ Could not load metrics: {e}")
         model_metrics = {}
     
-    # Store model metadata
     model_info = {
         'status': 'loaded',
         'loaded_at': datetime.now().isoformat(),
@@ -228,7 +222,6 @@ def api_predict():
             logger.warning("⚠ Prediction request received with no data")
             return jsonify({'error': 'Data tidak diterima', 'code': 'NO_DATA'}), 400
         
-        # Fast validation - gunakan pre-cached list
         missing_features = [f for f in required_features_list if f not in data]
         
         if missing_features:
@@ -239,16 +232,13 @@ def api_predict():
                 'missing': missing_features
             }), 400
         
-        # Buat numpy array langsung (lebih cepat dari DataFrame)
         encoded_values = []
         
         for col in features_order:
             try:
                 raw_value = data[col]
                 
-                # Handle encoder - it's now a dict mapping codes to numeric indices
                 if isinstance(encoders[col], dict):
-                    # encoders[col] maps codes to numeric indices
                     if raw_value not in encoders[col]:
                         logger.warning(f"⚠ Invalid value for {col}: {raw_value}")
                         return jsonify({
@@ -260,7 +250,6 @@ def api_predict():
                         }), 400
                     encoded_value = encoders[col][raw_value]
                 else:
-                    # Legacy support for sklearn LabelEncoder
                     encoded_value = encoders[col].transform([raw_value])[0]
                 
                 encoded_values.append(encoded_value)
@@ -275,7 +264,7 @@ def api_predict():
         # Convert ke numpy array untuk prediksi
         input_array = np.array([encoded_values])
         
-        # Prediksi langsung dari numpy array (lebih cepat)
+        # Prediksi langsung dari numpy array (lebih cepet)
         try:
             prediction = model.predict(input_array)[0]
             probability = model.predict_proba(input_array)[0]
@@ -289,7 +278,7 @@ def api_predict():
         result = 'POISONOUS' if prediction == 1 else 'EDIBLE'
         confidence = float(max(probability)) * 100
         
-        # Build mapped input data untuk response (konversi dari code ke human-readable)
+        # Build mapped input data untuk response 
         mapped_input = {}
         for col in required_features_list:
             raw_value = data[col]
@@ -392,5 +381,4 @@ def get_model_info():
     return jsonify(info)
 
 if __name__ == '__main__':
-    # Production mode - no debug, faster performance
     app.run(debug=False, host='0.0.0.0', port=8000, threaded=True)
