@@ -262,14 +262,12 @@ def api_predict():
         for col in features_order:
             try:
                 raw_value = data[col]
-                
-                # Use encoder_mapping (dict format) untuk validation yang lebih clean
-                if col in encoder_mapping:
-                    valid_values = encoder_mapping[col]
-                    
-                    if raw_value not in valid_values:
-                        valid_options = list(valid_values.keys())
-                        logger.warning(f"⚠ Invalid value for {col}: {raw_value}. Valid: {valid_options}")
+
+                # validasi berdasarkan FEATURE_MAPPING
+                if col in FEATURE_MAPPING:
+                    if raw_value not in FEATURE_MAPPING[col]:
+                        valid_options = list(FEATURE_MAPPING[col].keys())
+
                         return jsonify({
                             'error': f'Nilai tidak valid untuk {col}: {raw_value}',
                             'code': 'INVALID_VALUE',
@@ -277,15 +275,20 @@ def api_predict():
                             'received': raw_value,
                             'valid_options': valid_options
                         }), 400
-                    
-                    encoded_value = valid_values[raw_value]
-                else:
-                    logger.error(f"❌ Column {col} not found in encoder_mapping")
-                    return jsonify({
-                        'error': f'Kolom {col} tidak valid',
-                        'code': 'INVALID_COLUMN',
-                        'field': col
-                    }), 400
+
+                # encoding asli dari LabelEncoder
+                encoded_value = encoders[col].transform([raw_value])[0]
+
+                encoded_values.append(encoded_value)
+
+            except Exception as e:
+                logger.error(f"❌ Encoding error for {col}: {str(e)}")
+
+                return jsonify({
+                    'error': f'Nilai tidak valid untuk {col}: {str(e)}',
+                    'code': 'ENCODING_ERROR',
+                    'field': col
+                }), 400
                 
                 encoded_values.append(encoded_value)
             except (ValueError, KeyError) as e:
