@@ -420,9 +420,11 @@ document.getElementById('predictionForm').addEventListener('submit', async (e) =
     
     if (resultContainer) {
         resultContainer.style.display = 'block';
-        resultCard.style.display = 'none';
-        loadingAlert.style.display = 'block';
-        loadingAlert.scrollIntoView({behavior: 'auto', block: 'nearest'});
+        if (resultCard) resultCard.style.display = 'none';
+        if (loadingAlert) {
+            loadingAlert.style.display = 'block';
+            loadingAlert.scrollIntoView({behavior: 'auto', block: 'nearest'});
+        }
     }
     
     try {
@@ -440,7 +442,14 @@ document.getElementById('predictionForm').addEventListener('submit', async (e) =
             displayPredictionResult(result);
             showNotification('✅ Prediksi berhasil!', 'success', 2000);
         } else {
-            displayError(result.error || 'Terjadi kesalahan pada prediksi');
+            // Handle error with more detail for INVALID_VALUE
+            if (result.code === 'INVALID_VALUE' && result.valid_options) {
+                const fieldLabel = result.field.replace(/-/g, ' ').toUpperCase();
+                const validList = result.valid_options.join(', ');
+                displayError(`<strong>${fieldLabel}</strong> tidak valid. Gunakan salah satu: ${validList}`);
+            } else {
+                displayError(result.error || 'Terjadi kesalahan pada prediksi');
+            }
         }
     } catch (error) {
         if (loadingAlert) loadingAlert.style.display = 'none';
@@ -530,18 +539,22 @@ function displayError(message) {
     const alertDiv = document.createElement('div');
     alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
     alertDiv.role = 'alert';
+    
+    // Check if message is HTML or plain text
+    const isHTML = message.includes('<');
     alertDiv.innerHTML = `
         <i class="fas fa-exclamation-circle me-2"></i>
-        <strong>Error:</strong> ${message}
+        <strong>Error:</strong> ${isHTML ? message : `<span>${message}</span>`}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
     const resultContainer = document.getElementById('resultContainer');
     if (resultContainer) {
+        resultContainer.innerHTML = '';  // Clear previous errors
         resultContainer.appendChild(alertDiv);
+        resultContainer.style.display = 'block';
+        resultContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
     }
-    
-    document.getElementById('resultCard').style.display = 'none';
 }
 </script>
 

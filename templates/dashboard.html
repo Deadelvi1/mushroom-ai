@@ -184,7 +184,9 @@ let distributionChart, confidenceChart;
 
 async function loadDashboardData() {
     try {
+        // Load main stats
         const response = await fetch('/api/stats');
+        if (!response.ok) throw new Error('Failed to load stats');
         const stats = await response.json();
         
         animateStatCard('totalStats', stats.total);
@@ -197,13 +199,25 @@ async function loadDashboardData() {
         confidenceElement.textContent = stats.avg_confidence + '%';
         
         updateDistributionChart(stats);
-        
-        updateConfidenceChart(stats);
-        
-        loadRecentPredictions();
-        
     } catch (error) {
-        console.error('Error loading dashboard data:', error);
+        console.error('Error loading stats:', error);
+    }
+    
+    try {
+        // Load confidence distribution separately
+        const confidenceResponse = await fetch('/api/confidence-distribution');
+        if (!confidenceResponse.ok) throw new Error('Failed to load confidence distribution');
+        const confidenceDistribution = await confidenceResponse.json();
+        updateConfidenceChart(confidenceDistribution);
+    } catch (error) {
+        console.error('Error loading confidence distribution:', error);
+    }
+    
+    try {
+        // Load recent predictions
+        await loadRecentPredictions();
+    } catch (error) {
+        console.error('Error loading recent predictions:', error);
     }
 }
 
@@ -288,6 +302,7 @@ function updateDistributionChart(stats) {
                                 return label + ': ' + value + ' items';
                             }
                         }
+ 
                     }
                 }
             }
@@ -295,60 +310,71 @@ function updateDistributionChart(stats) {
     }
 }
 
-function updateConfidenceChart(stats) {
-    const ctx = document.getElementById('confidenceChart');
-    
-    const confidenceData = {
-        'High (85+)': 0,
-        'Medium (70-85)': 0,
-        'Low (<70)': 0
-    };
-    
-    if (confidenceChart) {
-        confidenceChart.data.datasets[0].data = Object.values(confidenceData);
-        confidenceChart.update();
-    } else {
-        confidenceChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(confidenceData),
-                datasets: [{
-                    label: 'Predictions',
-                    data: Object.values(confidenceData),
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                    borderColor: ['#28a745', '#ffc107', '#dc3545'],
-                    borderWidth: 2,
-                    borderRadius: 5,
-                    hoverBackgroundColor: ['#20c997', '#ffb700', '#c82333']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
+function updateConfidenceChart(confidenceDistribution) {
+    try {
+        const canvasElement = document.getElementById('confidenceChart');
+        if (!canvasElement) {
+            console.error('Canvas element confidenceChart not found');
+            return;
+        }
+        
+        const ctx = canvasElement.getContext('2d');
+        
+        const confidenceData = {
+            'High (85+)': confidenceDistribution.high || 0,
+            'Medium (70-85)': confidenceDistribution.medium || 0,
+            'Low (<70)': confidenceDistribution.low || 0
+        };
+        
+        if (confidenceChart) {
+            confidenceChart.data.labels = Object.keys(confidenceData);
+            confidenceChart.data.datasets[0].data = Object.values(confidenceData);
+            confidenceChart.update();
+        } else {
+            confidenceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(confidenceData),
+                    datasets: [{
+                        label: 'Predictions',
+                        data: Object.values(confidenceData),
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                        borderColor: ['#28a745', '#ffc107', '#dc3545'],
+                        borderWidth: 2,
+                        borderRadius: 5,
+                        hoverBackgroundColor: ['#20c997', '#ffb700', '#c82333']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.x + ' predictions';
+                                }
+                            }
+                        }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.x + ' predictions';
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
                             }
                         }
                     }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
                 }
-            }
-        });
+            });
+        }
+    } catch (error) {
+        console.error('Error updating confidence chart:', error);
     }
 }
 

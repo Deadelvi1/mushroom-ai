@@ -124,6 +124,25 @@ FEATURE_MAPPING = {
     }
 }
 
+# ==================== BUILD ENCODERS FROM LABELENOCER ====================
+
+def build_encoder_mapping(encoders):
+    """Convert LabelEncoder objects to dict mapping: value -> index"""
+    encoder_mapping = {}
+    
+    for col, encoder in encoders.items():
+        if hasattr(encoder, 'classes_'):
+            # LabelEncoder - convert to dict
+            encoder_mapping[col] = {label: idx for idx, label in enumerate(encoder.classes_)}
+        elif isinstance(encoder, dict):
+            # Already dict
+            encoder_mapping[col] = encoder
+        else:
+            logger.warning(f"Unknown encoder type for {col}: {type(encoder)}")
+            encoder_mapping[col] = {}
+    
+    return encoder_mapping
+
 # ==================== BUILD REVERSE ENCODERS ====================
 
 def build_reverse_encoders(feature_mapping, encoders):
@@ -146,6 +165,7 @@ def build_reverse_encoders(feature_mapping, encoders):
 
 model = None
 encoders = None
+encoder_mapping = None  # Dict mapping untuk validation
 required_features_list = None
 features_order = None
 reverse_encoders = None
@@ -155,9 +175,13 @@ model_info = {}
 try:
     model = joblib.load('model/model.pkl')
     encoders = joblib.load('model/encoder.pkl')
+    
+    # Convert LabelEncoder to dict mapping untuk easy validation
+    encoder_mapping = build_encoder_mapping(encoders)
+    
     required_features_list = [f for f in encoders.keys() if f != 'poisonous']
     features_order = required_features_list.copy()
-    reverse_encoders = build_reverse_encoders(FEATURE_MAPPING, encoders)
+    reverse_encoders = build_reverse_encoders(FEATURE_MAPPING, encoder_mapping)
     
     try:
         if os.path.exists('model/metrics.json'):
@@ -189,6 +213,7 @@ except FileNotFoundError as e:
     print("  Jalankan: python model/train_model.py")
     model = None
     encoders = None
+    encoder_mapping = None
     reverse_encoders = None
     model_metrics = None
     model_info = {'status': 'not_loaded', 'error': str(e)}
@@ -210,7 +235,7 @@ def dashboard():
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
-    if model is None or encoders is None:
+    if model is None or encoders is None or encoder_mapping is None:
         error_msg = 'Model belum dimuat. Jalankan: python model/train_model.py'
         logger.error(f"❌ {error_msg}")
         return jsonify({'error': error_msg, 'code': 'MODEL_NOT_LOADED'}), 503
@@ -238,19 +263,29 @@ def api_predict():
             try:
                 raw_value = data[col]
                 
-                if isinstance(encoders[col], dict):
-                    if raw_value not in encoders[col]:
-                        logger.warning(f"⚠ Invalid value for {col}: {raw_value}")
+                # Use encoder_mapping (dict format) untuk validation yang lebih clean
+                if col in encoder_mapping:
+                    valid_values = encoder_mapping[col]
+                    
+                    if raw_value not in valid_values:
+                        valid_options = list(valid_values.keys())
+                        logger.warning(f"⚠ Invalid value for {col}: {raw_value}. Valid: {valid_options}")
                         return jsonify({
                             'error': f'Nilai tidak valid untuk {col}: {raw_value}',
                             'code': 'INVALID_VALUE',
                             'field': col,
                             'received': raw_value,
-                            'valid_options': list(encoders[col].keys())
+                            'valid_options': valid_options
                         }), 400
-                    encoded_value = encoders[col][raw_value]
+                    
+                    encoded_value = valid_values[raw_value]
                 else:
-                    encoded_value = encoders[col].transform([raw_value])[0]
+                    logger.error(f"❌ Column {col} not found in encoder_mapping")
+                    return jsonify({
+                        'error': f'Kolom {col} tidak valid',
+                        'code': 'INVALID_COLUMN',
+                        'field': col
+                    }), 400
                 
                 encoded_values.append(encoded_value)
             except (ValueError, KeyError) as e:
@@ -346,6 +381,26 @@ def get_stats():
         'poisonous': poisonous,
         'edible': edible,
         'avg_confidence': round(avg_confidence, 2)
+    })
+
+@app.route('/api/confidence-distribution')
+def get_confidence_distribution():
+    """Get distribution of confidence scores"""
+    if not prediction_history:
+        return jsonify({
+            'high': 0,
+            'medium': 0,
+            'low': 0
+        })
+    
+    high = sum(1 for item in prediction_history if item['confidence'] >= 85)
+    medium = sum(1 for item in prediction_history if 70 <= item['confidence'] < 85)
+    low = sum(1 for item in prediction_history if item['confidence'] < 70)
+    
+    return jsonify({
+        'high': high,
+        'medium': medium,
+        'low': low
     })
 
 @app.route('/api/model-metrics')
