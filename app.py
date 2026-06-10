@@ -74,10 +74,10 @@ FEATURE_MAPPING = {
         'f': 'Foul', 'm': 'Musty', 'n': 'None', 'p': 'Pungent', 's': 'Spicy'
     },
     'gill-attachment': {
-        'a': 'Attached', 'd': 'Descending', 'f': 'Free', 'n': 'Notched'
+        'a': 'Attached', 'f': 'Free'
     },
     'gill-spacing': {
-        'c': 'Close', 'w': 'Crowded', 'd': 'Distant'
+        'c': 'Close', 'w': 'Crowded'
     },
     'gill-size': {'b': 'Broad', 'n': 'Narrow'},
     'gill-color': {
@@ -87,8 +87,7 @@ FEATURE_MAPPING = {
     },
     'stalk-shape': {'e': 'Enlarging', 't': 'Tapering'},
     'stalk-root': {
-        'b': 'Bulbous', 'c': 'Club', 'u': 'Cup', 'e': 'Equal',
-        'z': 'Rhizomorphs', 'r': 'Rooted', '?': 'Missing', 'missing': 'Missing'
+        'b': 'Bulbous', 'c': 'Club', 'e': 'Equal', 'r': 'Rooted', 'nan': 'Missing'
     },
     'stalk-surface-above-ring': {
         'f': 'Fibrous', 'y': 'Scaly', 'k': 'Silky', 's': 'Smooth'
@@ -107,8 +106,7 @@ FEATURE_MAPPING = {
     'veil-color': {'n': 'Brown', 'o': 'Orange', 'w': 'White', 'y': 'Yellow'},
     'ring-number': {'n': 'None', 'o': 'One', 't': 'Two'},
     'ring-type': {
-        'e': 'Evanescent', 'f': 'Flaring', 'c': 'Cobwebby', 
-        'l': 'Large', 'n': 'None', 'p': 'Pendant', 's': 'Sheathing', 'z': 'Zone'
+        'e': 'Evanescent', 'f': 'Flaring', 'l': 'Large', 'n': 'None', 'p': 'Pendant'
     },
     'spore-print-color': {
         'k': 'Black', 'n': 'Brown', 'b': 'Buff', 'h': 'Chocolate',
@@ -263,41 +261,57 @@ def api_predict():
             try:
                 raw_value = data[col]
 
-                # validasi berdasarkan FEATURE_MAPPING
-                if col in FEATURE_MAPPING:
-                    if raw_value not in FEATURE_MAPPING[col]:
-                        valid_options = list(FEATURE_MAPPING[col].keys())
+                # Get valid options from encoder if available, fallback to FEATURE_MAPPING
+                valid_options = []
+                if hasattr(encoders[col], 'classes_'):
+                    valid_options = list(encoders[col].classes_)
+                elif col in FEATURE_MAPPING:
+                    valid_options = list(FEATURE_MAPPING[col].keys())
 
-                        return jsonify({
-                            'error': f'Nilai tidak valid untuk {col}: {raw_value}',
-                            'code': 'INVALID_VALUE',
-                            'field': col,
-                            'received': raw_value,
-                            'valid_options': valid_options
-                        }), 400
+                # validasi berdasarkan encoder classes (bukan FEATURE_MAPPING!)
+                if valid_options and raw_value not in valid_options:
+                    return jsonify({
+                        'error': f'Nilai tidak valid untuk {col}: {raw_value}',
+                        'code': 'INVALID_VALUE',
+                        'field': col,
+                        'received': raw_value,
+                        'valid_options': valid_options
+                    }), 400
 
                 # encoding asli dari LabelEncoder
-                encoded_value = encoders[col].transform([raw_value])[0]
+                try:
+                    encoded_value = encoders[col].transform([raw_value])[0]
+                    encoded_values.append(encoded_value)
+                except (ValueError, KeyError) as encode_err:
+                    # Fallback error handling
+                    logger.error(f"❌ LabelEncoder error for {col} with value '{raw_value}': {str(encode_err)}")
+                    if hasattr(encoders[col], 'classes_'):
+                        valid_options = list(encoders[col].classes_)
+                    else:
+                        valid_options = list(FEATURE_MAPPING[col].keys()) if col in FEATURE_MAPPING else []
+                    
+                    return jsonify({
+                        'error': f'Nilai "{raw_value}" tidak dikenali untuk {col}',
+                        'code': 'ENCODING_ERROR',
+                        'field': col,
+                        'received': raw_value,
+                        'valid_options': valid_options
+                    }), 400
 
-                encoded_values.append(encoded_value)
-
+            except KeyError as e:
+                logger.error(f"❌ Missing field error: {str(e)}")
+                return jsonify({
+                    'error': f'Field yang hilang: {col}',
+                    'code': 'MISSING_FIELD',
+                    'field': col
+                }), 400
             except Exception as e:
-                logger.error(f"❌ Encoding error for {col}: {str(e)}")
-
+                logger.error(f"❌ Unexpected error for {col}: {str(e)}", exc_info=True)
                 return jsonify({
-                    'error': f'Nilai tidak valid untuk {col}: {str(e)}',
-                    'code': 'ENCODING_ERROR',
+                    'error': f'Error tidak terduga untuk {col}: {str(e)}',
+                    'code': 'UNEXPECTED_ERROR',
                     'field': col
-                }), 400
-                
-                encoded_values.append(encoded_value)
-            except (ValueError, KeyError) as e:
-                logger.error(f"❌ Encoding error for {col}: {str(e)}")
-                return jsonify({
-                    'error': f'Nilai tidak valid untuk {col}: {str(e)}',
-                    'code': 'ENCODING_ERROR',
-                    'field': col
-                }), 400
+                }), 500
         
         # Convert ke numpy array untuk prediksi
         input_array = np.array([encoded_values])
